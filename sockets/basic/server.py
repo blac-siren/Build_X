@@ -2,12 +2,11 @@
 
 import socket
 
-HOST = '127.0.0.1'
-PORT = 64321
+HOST = "127.0.0.1"
+PORT = 65443
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     sock.bind((HOST, PORT))
-
     sock.listen()
 
     # conn is new socket object usable to send # and receive data on the connection.
@@ -15,7 +14,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     conn, address = sock.accept()
 
     with conn:
-        print(f"Connected to {addrs}")
+        print(f"Connected to {address}")
         while True:
             data = conn.recv(1024)
             if not data:
