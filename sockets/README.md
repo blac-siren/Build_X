@@ -13,6 +13,13 @@
 - `socket.recv(bufsize)` receive data from socket. The return value is a byte object representing the data received. The maximum amount of data to be received at once is specified by `bufsize`.
 - `conn.recv()` reads whatever data the client sends and echoes back using `conn.sendall()`.
 
+__In the client side__
+- We will simply do the following:
+    - create a socket object
+    - connect it to the server
+    - send the message to the server using the method `sendall()`
+    - use `recv()` method to read server's reply and print it.
+
 #### Blocking Calls
 > A socket function or method that temporarily suspends your application is a blocking call.
 - `accept()`, `connect()`, `send()`, `recv()` are example of blocking method in python socket module. They don't return immediately.
