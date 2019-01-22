@@ -6,4 +6,4 @@
     | Address Family  | Protocal      | Address tuple   |
     | ----------------|:-------------:| ---------------:|
     | __socket.AF_INET__| IPV4        | (host, port)    |
-- `SOCK_STREAM` is the socket type for __TCP__, the protocal will use to transport our messages packages in the network.
+- `SOCK_STREAM` is the socket type for __TCP__, the protocal will use to transport our messages packets in the network.
