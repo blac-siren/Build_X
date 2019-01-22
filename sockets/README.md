@@ -17,8 +17,8 @@ __In the client side__
 - We will simply do the following:
     - create a socket object
     - connect it to the server
-    - send the message to the server using the method `sendall()`
-    - use `recv()` method to read server's reply and print it.
+    - send the message to the server
+    - read server's reply and print it.
 
 #### Blocking Calls
 > A socket function or method that temporarily suspends your application is a blocking call.
