@@ -9,7 +9,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     sock.bind((HOST, PORT))
 
     sock.listen()
-    conn, addrs = sock.accept()
+
+    # conn is new socket object usable to send # and receive data on the connection.
+    # address bound to the socket on the other end of the connection
+    conn, address = sock.accept()
 
     with conn:
         print(f"Connected to {addrs}")
