@@ -22,7 +22,7 @@ if len(sys.argv) != 3:
     print("Usage:", sys.argv[0], "<host><port>")
     sys.exit(1)
 
-host, port = sys.argv[1], int([sys.argv[2]])
+host, port = sys.argv[1], int(sys.argv[2])
 lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Avoid bind() execptiion: OSError [Error 48] Address in use
 lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -34,7 +34,7 @@ sel.register(lsock, selectors.EVENT_READ, data=None)
 
 try:
     while True:
-        enents = sel.selectors(timeout=None)
+        events = sel.select(timeout=None)
         for key, mask in events:
             if key.data is None:
                 accept_wrapper(key.fileobj)
