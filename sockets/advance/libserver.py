@@ -19,3 +19,18 @@ class Message:
             self.read()
         if mask & selectors.EVENT_WRITE:
             self.write
+
+    def read(self):
+        self._read()
+
+        if self._jsonheader_len is None:
+            self.process_protoheader()
+
+        if self._jsonheader_len is not None:
+            if self.jsonheader is None:
+                self.process_jsonheader()
+
+        if self.jsonheader:
+            if self.request is None:
+                self.process_request()
+j
