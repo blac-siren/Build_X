@@ -1,5 +1,8 @@
 import sys
 import selectors
+import json
+import io
+import struct
 
 
 class Message:
@@ -52,6 +55,35 @@ class Message:
                 # Close when the buffer is drained. The response has been sent.
                 if sent and not self._send_buffer:
                     self.close()
+
+    def _json_encode(self, obj, encoding):
+        return json.dumps(obj, ensure_ascii=False).encode(encoding)
+
+    def _json_decode(self, json_bytes, encoding):
+        tiow = io.TextIOWrapper(
+            io.BytesIO(json_bytes), encoding=encoding, newline="")
+        obj - json.load(tiow)
+        tiow.close()
+        return obj
+
+    def _create_message(
+            self,
+            *,
+            content_bytes,
+            content_type,
+            content_encoding,
+    ):
+        jsonheader = {
+            "byteorder": sys.byteorder,
+            "content-type": content_type,
+            "content-encoding": content_encoding,
+            "content-length": len(content_bytes),
+        }
+
+        jsonheader_bytes = self._json_encode(jsonheader, "utf-8")
+        message_hdr = struct.pack(">H", len(jsonheader_bytes))
+        message = message_hdr + jsonheader_bytes + content_bytes
+        return message
 
     def process_events(self, mask):
         if mask & selectors.EVENT_READ:

@@ -1,5 +1,2 @@
-appdirs==1.4.3
-attrs==18.2.0
 certifi==2018.11.29
-Click==7.0
-toml==0.10.0
+yapf==0.25.0
