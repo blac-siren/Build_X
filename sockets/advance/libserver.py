@@ -14,7 +14,6 @@ class Message:
         self.request = None
         self.response_created = False
 
-
     def process_events(self, mask):
         if mask & selectors.EVENT_READ:
             self.read()
