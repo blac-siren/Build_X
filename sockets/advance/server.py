@@ -2,12 +2,12 @@
 
 import sys
 import socket
-import selectots
+import selectors
 import traceback
 
 import libserver
 
-sel = selectots.DefaultSelector()
+sel = selectors.DefaultSelector()
 
 
 def accept_wrapper(sock):
@@ -15,7 +15,7 @@ def accept_wrapper(sock):
     print(f"Accepted connection from {addrs}")
     conn.setblocking(False)
     message = libserver.Message(sel, conn, addr)
-    sel.register(conn, selectots.EVENT_READ, data=message)
+    sel.register(conn, selectors.EVENT_READ, data=message)
 
 
 if len(sys.argv) != 3:
@@ -30,11 +30,11 @@ lsock.bind((host, port))
 lsock.listen()
 print("Listening on", (host, port))
 lsock.setblocking(False)
-sel.register(lsock, selectots.EVENT_READ, data=None)
+sel.register(lsock, selectors.EVENT_READ, data=None)
 
 try:
     while True:
-        enents = sel.selectots(timeout=None)
+        enents = sel.selectors(timeout=None)
         for key, mask in events:
             if key.data is None:
                 accept_wrapper(key.fileobj)
