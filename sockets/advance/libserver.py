@@ -4,6 +4,12 @@ import json
 import io
 import struct
 
+request_search = {
+    "morpheus": "Follow the white rabbit. \U0001f430",
+    "ring": "In the caves beneath the Misty Mountains. \U0001f48d",
+    "\U0001f436": "\U0001f43e Playing ball! \U0001f3d0",
+}
+
 
 class Message:
     def __init__(self, selector, sock, addrs):
@@ -85,6 +91,15 @@ class Message:
         message = message_hdr + jsonheader_bytes + content_bytes
         return message
 
+    def _create_response_binary_content(self):
+        response = {
+            "content_bytes":
+            b"First 10 bytes of the request" + self.request[:10],
+            "content_type": "binary/custom-server-binary-type",
+            "content_encoding": "binary"
+        }
+        return response
+
     def process_events(self, mask):
         if mask & selectors.EVENT_READ:
             self.read()
@@ -111,3 +126,19 @@ class Message:
                 self.create_response()
 
         self._write()
+
+    def close(self):
+        print(f"Closing conneciton to {self.addrs}")
+        try:
+            self.selectors.unregister(self.sock)
+        except Exception as e:
+            print(f"Error: selector.unregister exception for",
+                  f"{self.addrs}:{repr(e)}")
+
+        try:
+            self.sock.close()
+        except OSError as e:
+            print(f"Error: socket.close() exception for",
+                  f"{self.addrs}: {repr(e)}")
+        finally:
+            self.sock = None
