@@ -33,4 +33,10 @@ class Message:
         if self.jsonheader:
             if self.request is None:
                 self.process_request()
-j
+
+    def write(self):
+        if self.request:
+            if not self.response_created:
+                self.create_response()
+
+        self._write()
