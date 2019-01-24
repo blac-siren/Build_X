@@ -91,6 +91,22 @@ class Message:
         message = message_hdr + jsonheader_bytes + content_bytes
         return message
 
+    def _create_reponse_json_content(self):
+        action = self.request.get('action')
+        if action == 'search':
+            query = self.request.get('value')
+            answer = request_search.get(query) or f'No match for {query}'
+            content = {"result": answer}
+        else:
+            content = {"result": f"Error: Invalid action '{action}''"}
+        content_encoding = 'utf-8'
+        response = {
+            "content_bytes": self._json_encode(content, content_encoding),
+            "content_type": "text/json",
+            "content_encoding": content_encoding
+        }
+        return response
+
     def _create_response_binary_content(self):
         response = {
             "content_bytes":
@@ -142,3 +158,52 @@ class Message:
                   f"{self.addrs}: {repr(e)}")
         finally:
             self.sock = None
+
+    def process_protoheader(self):
+        hdrlen = 2
+        if len(self._recv_buffer) >= hdrlen:
+            self._jsonheader_len = struct.unpack(">H",
+                                                 self._recv_buffer[:hdrlen])[0]
+        self._recv_buffer = self._recv_buffer[hdrlen:]
+
+    def process_jsonheader(self):
+        hdrlen = self._jsonheader_len
+        if len(self._recv_buffer) >= hrden:
+            self.jsonheader = self._json_decode(self, _recv_buffer[:hrden],
+                                                "utf-8")
+            self._recv_buffer = self._recv_buffer[hdrlen:]
+            for reqhdr in (
+                    "byteorder",
+                    "content-length, content-type, content-encoding",
+            ):
+                if reqhdr not in self.jsonheader:
+                    raise ValueError(f"Missing required header '{reqhdr}''")
+
+    def process_request(self):
+        content_len = self.jsonheader['content-lenght']
+        if not len(self._recv_buffer) >= content_len:
+            return
+        data = self._recv_buffer[:content_len]
+        self._recv_buffer = self._recv_buffer[content_len:]
+        if self.jsonheader['content-type'] == "text/json":
+            encoding = self.jsonheader["content-encoding"]
+            self.request = self._json_decode(data, encoding)
+            print(f"Received request, {repr(self.request)} from {self.addrs}")
+        else:
+            # Binary or unknoewn content-type
+            self.request = data
+            print(
+                f"Received {self.jsonheader['content-type']} request from {self.addrs}"
+            )
+
+            # Set selector to listen for write events, we're done reading
+        self._set_selector_events_mask('w')
+
+        def create_response(self):
+            if self.jsonheader["content-type"] == "text/json":
+                response = self._create_reponse_json_content()
+            else:
+                response = self._create_response_binary_content()
+            message = self._create_message(**response)
+            self.response_created = True
+            self._send_buffer += message
