@@ -25,3 +25,11 @@ __In the client side__
 - `accept()`, `connect()`, `send()`, `recv()` are example of blocking method in python socket module. They don't return immediately.
 - Blocking calls have to wait on the system calls (I/O) to complete before they can return a value.
 - Blocking socket calls can be set to non-blocking mode so they can return immediately. Non-blocking mode is supported with `setblocking()`.
+
+#### Reference
+> [socket-programming-tutorial](https://realpython.com/python-sockets/#multi-connection-client-and-server)
+
+> [Selectors](https://docs.python.org/3/library/selectors.html)
+
+> [Select](https://docs.python.org/3/library/select.html#module-select)
+> [I/O multiplexing](https://xuri.me/2017/08/06/io-multiplexing-in-linux.html)
