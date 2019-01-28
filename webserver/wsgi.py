@@ -71,8 +71,45 @@ class WSGIServer:
         env['wsgi.run_once'] = False
 
         # Required CGI variables
-        env['REQUEST_METHOD'] = self.request_method  
+        env['REQUEST_METHOD'] = self.request_method
         env['PATH_INFO'] = self.path
         env['SERVER_NAME'] = self.server_name
         env['SERVER_PORT'] = str(self.server_port)
         return env
+
+    def start_response(self, status, response_header, exc_info=None):
+        server_header = [
+            ('Date', 'Tue, 31 Mar 2015 12:54:48 GMT'),
+            ('Server', 'WSGIServer 0.2'),
+        ]
+        self.headers_set = [status, response_headers + server_headers]
+        # To adhere to WSGI specification the start_response must return
+        # a 'write' callable. We simplicity's sake we'll ignore that detail
+        # for now.
+        # return self.finish_response
+
+     def finish_response(self, result):
+        try:
+            status, response_headers = self.headers_set
+            response = 'HTTP/1.1 {status}\r\n'.format(status=status)
+            for header in response_headers:
+                response += '{0}: {1}\r\n'.format(*header)
+            response += '\r\n'
+            for data in result:
+                response += data
+            # Print formatted response data a la 'curl -v'
+            print(''.join(
+                '> {line}\n'.format(line=line)
+                for line in response.splitlines()
+            ))
+            self.client_connection.sendall(response)
+        finally:
+            self.client_connection.close()
+
+
+SERVER_ADDRESS = (HOST, PORT) = '', 8888
+
+def make_server(server_address, application):
+    server = WSGIServer(server_address)
+    server.set_app(application)
+    return server
