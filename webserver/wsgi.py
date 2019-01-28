@@ -1,34 +1,39 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2.7
 """
 Implementation of Webserver Gateway Interface (WSGI)
 """
-
 import sys
 import socket
 
+try:
+    import StringIO
+except ImportError:
+    from io import StringIO
 
-class WSGIServer:
+
+class WSGISERVER:
 
     address_family = socket.AF_INET
-    socket_type = socket.SOCK_STREAM
+    socket_family = socket.SOCK_STREAM
     request_queue_size = 1
 
     def __init__(self, server_address):
         self.listen_socket = listen_socket = socket.socket(
             self.address_family,
-            self.socket_type,
+            self.socket_family,
         )
-        listen_socket.bind(address)
+        listen_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        listen_socket.bind(server_address)
         listen_socket.listen(self.request_queue_size)
-        host, port = listen_socket.getsockname()[:2]
+        host, port = self.listen_socket.getsockname()[:2]
         self.server_name = socket.getfqdn(host)
         self.server_port = port
         self.headers_set = []
 
-    def set_app(sefl, application):
+    def set_app(self, application):
         self.application = application
 
-    def serve_forever(self):
+    def server_forever(self):
         listen_socket = self.listen_socket
         while True:
             self.client_connection, client_address = listen_socket.accept()
@@ -36,23 +41,18 @@ class WSGIServer:
 
     def handle_one_request(self):
         self.request_data = request_data = self.client_connection.recv(1024)
-        print(''.join('<{line>}\n'.format(line=line)
+        print(''.join('< {line}\n'.format(line=line)
                       for line in request_data.splitlines()))
         self.parse_request(request_data)
-
         env = self.get_environ()
-        result = self.set_application(env, self.start_response)
+        result = self.application(env, self.start_response)
         self.finish_response(result)
 
     def parse_request(self, text):
         request_line = text.splitlines()[0]
         request_line = request_line.rstrip('\r\n')
-
-        (
-            self.request_method,
-            self.path,
-            self.request_version,
-        ) = request_line.split()
+        (self.request_method, self.path,
+         self.request_version) = request_line.split()
 
     def get_environ(self):
         env = {}
@@ -63,7 +63,6 @@ class WSGIServer:
         env['wsgi.multithread'] = False
         env['wsgi.multiprocess'] = False
         env['wsgi.run_once'] = False
-
         # Required CGI variables
         env['REQUEST_METHOD'] = self.request_method
         env['PATH_INFO'] = self.path
@@ -71,8 +70,8 @@ class WSGIServer:
         env['SERVER_PORT'] = str(self.server_port)
         return env
 
-    def start_response(self, status, response_header, exc_info=None):
-        server_header = [
+    def start_response(self, status, response_headers, exc_info=None):
+        server_headers = [
             ('Date', 'Tue, 31 Mar 2015 12:54:48 GMT'),
             ('Server', 'WSGIServer 0.2'),
         ]
@@ -99,28 +98,22 @@ class WSGIServer:
             self.client_connection.close()
 
 
-SERVER_ADDRESS = (HOST, PORT) = '', 8888
+SERVER_ADDRESS = (HOST, PORT) = '', 8000
 
 
 def make_server(server_address, application):
-    server = WSGIServer(server_address)
-    server.set_app(application)
-    return server
-
-
-def make_server(server_address, application):
-    server = WSGIServer(server_address)
+    server = WSGISERVER(server_address)
     server.set_app(application)
     return server
 
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        sys.exit('Provide a WSGI application object as module:callable')
+        sys.exit("Provide a WSGI application object as module:callable")
     app_path = sys.argv[1]
-    module, application = app_path.split(':')
+    module, application = app_path.split(":")
     module = __import__(module)
     application = getattr(module, application)
     httpd = make_server(SERVER_ADDRESS, application)
-    print('WSGIServer: Serving HTTP on port {port} ...\n'.format(port=PORT))
-    httpd.serve_forever()
+    print("WSGIServer: Serving HTTP on port {port} ...\n".format(port=PORT))
+    httpd.server_forever()
