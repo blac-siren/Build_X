@@ -33,3 +33,13 @@ class WSGIServer:
         while True:
             self.client_connection, client_address = listen_socket.accept()
             self.handle_one_request()
+
+    def handle_one_request(self):
+        self.request_data = request_data = self.client_connection.recv(1024)
+        print(''.join('<{line>}\n'.format(line=line)
+                      for line in request_data.splitlines()))
+        self.parse_request(request_data)
+
+        env = self.get_environ()
+        result = self.set_application(env, self.start_response)
+        self.finish_response(result)
