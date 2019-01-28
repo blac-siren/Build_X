@@ -56,12 +56,6 @@ class WSGIServer:
 
     def get_environ(self):
         env = {}
-        # The following code snippet does not follow PEP8 conventions
-        # but it's formatted the way it is for demonstration purposes
-        # to emphasize the required variables and their values
-        #
-        # Required WSGI variables
-
         env['wsgi.version'] = (1, 0)
         env['wsgi.url_scheme'] = 'http'
         env['wsgi.input'] = StringIO.StringIO(self.request_data)
@@ -109,6 +103,7 @@ class WSGIServer:
 
 SERVER_ADDRESS = (HOST, PORT) = '', 8888
 
+
 def make_server(server_address, application):
     server = WSGIServer(server_address)
     server.set_app(application)
@@ -118,3 +113,14 @@ def make_server(server_address, application):
     server = WSGIServer(server_address)
     server.set_app(application)
     return server
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        sys.exit('Provide a WSGI application object as module:callable')
+    app_path = sys.argv[1]
+    module, application = app_path.split(':')
+    module = __import__(module)
+    application = getattr(module, application)
+    httpd = make_server(SERVER_ADDRESS, application)
+    print('WSGIServer: Serving HTTP on port {port} ...\n'.format(port=PORT))
+    httpd.serve_forever()
