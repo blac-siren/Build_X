@@ -43,3 +43,36 @@ class WSGIServer:
         env = self.get_environ()
         result = self.set_application(env, self.start_response)
         self.finish_response(result)
+
+    def parse_request(self, text):
+        request_line = text.splitlines()[0]
+        request_line = request_line.rstrip('\r\n')
+
+        (
+            self.request_method,
+            self.path,
+            self.request_version,
+        ) = request_line.split()
+
+    def get_environ(self):
+        env = {}
+        # The following code snippet does not follow PEP8 conventions
+        # but it's formatted the way it is for demonstration purposes
+        # to emphasize the required variables and their values
+        #
+        # Required WSGI variables
+
+        env['wsgi.version'] = (1, 0)
+        env['wsgi.url_scheme'] = 'http'
+        env['wsgi.input'] = StringIO.StringIO(self.request_data)
+        env['wsgi.errors'] = sys.stderr
+        env['wsgi.multithread'] = False
+        env['wsgi.multiprocess'] = False
+        env['wsgi.run_once'] = False
+
+        # Required CGI variables
+        env['REQUEST_METHOD'] = self.request_method  
+        env['PATH_INFO'] = self.path
+        env['SERVER_NAME'] = self.server_name
+        env['SERVER_PORT'] = str(self.server_port)
+        return env
