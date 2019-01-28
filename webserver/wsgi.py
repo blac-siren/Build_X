@@ -82,7 +82,7 @@ class WSGIServer:
         # for now.
         # return self.finish_response
 
-     def finish_response(self, result):
+    def finish_response(self, result):
         try:
             status, response_headers = self.headers_set
             response = 'HTTP/1.1 {status}\r\n'.format(status=status)
@@ -92,10 +92,8 @@ class WSGIServer:
             for data in result:
                 response += data
             # Print formatted response data a la 'curl -v'
-            print(''.join(
-                '> {line}\n'.format(line=line)
-                for line in response.splitlines()
-            ))
+            print(''.join('> {line}\n'.format(line=line)
+                          for line in response.splitlines()))
             self.client_connection.sendall(response)
         finally:
             self.client_connection.close()
@@ -109,10 +107,12 @@ def make_server(server_address, application):
     server.set_app(application)
     return server
 
+
 def make_server(server_address, application):
     server = WSGIServer(server_address)
     server.set_app(application)
     return server
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
