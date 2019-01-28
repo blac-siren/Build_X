@@ -25,4 +25,11 @@ class WSGIServer:
         self.server_port = port
         self.headers_set = []
 
-        
+    def set_app(sefl, application):
+        self.application = application
+
+    def serve_forever(self):
+        listen_socket = self.listen_socket
+        while True:
+            self.client_connection, client_address = listen_socket.accept()
+            self.handle_one_request()
