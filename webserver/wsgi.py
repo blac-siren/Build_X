@@ -4,11 +4,7 @@ Implementation of Webserver Gateway Interface (WSGI)
 """
 import sys
 import socket
-
-try:
-    import StringIO
-except ImportError:
-    from io import StringIO
+import io
 
 
 class WSGISERVER:
@@ -40,7 +36,8 @@ class WSGISERVER:
             self.handle_one_request()
 
     def handle_one_request(self):
-        self.request_data = request_data = self.client_connection.recv(1024)
+        self.request_data = request_data = self.client_connection.recv(
+            1024).decode()
         print(''.join('< {line}\n'.format(line=line)
                       for line in request_data.splitlines()))
         self.parse_request(request_data)
@@ -58,7 +55,7 @@ class WSGISERVER:
         env = {}
         env['wsgi.version'] = (1, 0)
         env['wsgi.url_scheme'] = 'http'
-        env['wsgi.input'] = StringIO.StringIO(self.request_data)
+        env['wsgi.input'] = io.StringIO(self.request_data)
         env['wsgi.errors'] = sys.stderr
         env['wsgi.multithread'] = False
         env['wsgi.multiprocess'] = False
@@ -89,11 +86,12 @@ class WSGISERVER:
                 response += '{0}: {1}\r\n'.format(*header)
             response += '\r\n'
             for data in result:
-                response += data
+                print(data)
+                response += data.decode()
             # Print formatted response data a la 'curl -v'
             print(''.join('> {line}\n'.format(line=line)
                           for line in response.splitlines()))
-            self.client_connection.sendall(response)
+            self.client_connection.sendall(response.encode())
         finally:
             self.client_connection.close()
 
