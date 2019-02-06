@@ -27,7 +27,6 @@ __In the client side__
 - Blocking socket calls can be set to non-blocking mode so they can return immediately. Non-blocking mode is supported with `setblocking()`.
 
 #### Reference
-- [socket-programming-tutorial](https://realpython.com/python-sockets/#multi-connection-client-and-server)
 - [Selectors](https://docs.python.org/3/library/selectors.html)
 - [Select](https://docs.python.org/3/library/select.html#module-select)
 - [I/O multiplexing](https://xuri.me/2017/08/06/io-multiplexing-in-linux.html)
